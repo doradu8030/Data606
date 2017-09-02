@@ -60,9 +60,22 @@ present$boys > present$girls
 ```
 Values of either TRUE if that year had more boys than girls, or FALSE if that year did not.
 
-4.  Make a plot that displays the boy-to-girl ratio for every year in the dataset.  What do you see?
+Make a plot that displays the boy-to-girl ratio for every year in the dataset.  What do you see?
 There is a significant drops in the ratio at birth over time. Also radio at birth in boys is greater than girls in the 1940's it went over 1.054 ratio in which more boys were born.
 
 ```{r}
 plot(x = present$year, y = present$boys/present$girls, type = "l")
+```
+
+
+4. In what year did we see the most total number of births in the U.S.?  
+
+
+```{r}
+present$tot <- present$boys + present$girls
+present$tot
+```
+```{r}
+which.max(present$tot)
+present$year[22]
 ```
