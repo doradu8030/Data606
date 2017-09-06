@@ -1,0 +1,181 @@
+---
+title: "Lab1"
+author: "Durley Torres-Marin"
+date: "September 5, 2017"
+output:
+  html_document: default
+---
+```{r}
+library(DATA606)
+```
+```{r load-data, eval=TRUE}
+setwd("~/R/Lab1")
+source("more/cdc.R")
+```
+* Exercise 1. How many cases are there in this data set? How many variables? For each variable, identify its data type (e.g. categorical, discrete).
+
+# From the Global Enviroment tab/ Data 
+This data set has 20000 cases and 9 variable or 
+```{r}
+dim(cdc)
+```
+# Also we can use the following command to find out the last entry on the data set 
+```{r}
+tail(cdc)
+```
+
+
+Variables
+genhlth: categorical/ordinal
+exarany:Categorical/binary 
+healthplan:Categorical/binary
+smoke100:Categorical/binary
+height: numerical/discrete
+weigth: numerical/continous
+wtdesire:numerical/continuos
+age:numerical/discrete
+gender:categorical/nominal
+
+
+
+* Exercise 2: Create a numerical summary for height and age, and compute the interquartile range for each. Compute the relative frequency distribution for gender and exerany. How many males are in the sample? What proportion of the sample reports being in excellent health?
+
+#Numerical summary for height
+```{r}
+summary(cdc$height)
+#Interquartile
+70 - 64
+```
+#Numerical summary for age
+```{r}
+summary(cdc$age)
+#Interquartile
+57 - 31
+```
+#Relative frecuency distribution by gender
+```{r}
+table(cdc$gender)/20000
+```
+# There are 9569 males in this sample
+```{r}
+table(cdc$gender)
+```
+# Out of 20000 cases, 4657 cases report being in excelent health.
+```{r}
+table(cdc$genhlth)
+table(cdc$genhlth == 'excellent')
+```
+
+
+* Exercise 3: What does the mosaic plot reveal about smoking habits and gender?
+
+Males are the most smokers than woman, a greater number of females had smoked less than 100 cigarrettes in their life time. 
+
+```{r}
+habitsbygender <- table(cdc$gender,cdc$smoke100)
+mosaicplot(habitsbygender)
+```
+
+
+* Exercise 4: Create a new object called under23_and_smoke that contains all observations of respondents under the age of 23 that have smoked 100 cigarettes in their lifetime. Write the command you used to create the new object as the answer to this exercise.
+
+```{r}
+resp_under23_smoke <- subset(cdc, age < 23 & smoke100 == "1")
+head(resp_under23_smoke )
+```
+
+
+
+* Exercise 5 :What does this box plot show? 
+```{r}
+bmi <- (cdc$weight / cdc$height^2) * 703
+boxplot(bmi ~ cdc$genhlth)
+```
+The box plot allows to compare clearly two variables;  general health and the BMI values for all respondents. 
+
+There is a condiserable amount of outliers in each level the BMI is beyond the upper whisker betwen 30 to 40, which make me think that in the first 3 levels it wouldn't be possible to have any healthy respondents with a BMI value over 30. It might be an error on this cases, this data needs to be reviewed. 
+The median variation has a minimal diference between all levels, the BMI  values are very close.  
+
+
+* Exercise 5: Pick another categorical variable from the data set and see how it relates to BMI. List the variable you chose, why you might think it would have a relationship to BMI, and indicate what the figure seems to suggest. 
+
+BMI and exerany = The box plot shows the respondents that exercised in the past month are less than the respondents that haven't done any exercise in the same period of time. The outliers are out of range. 
+
+```{r}
+boxplot(bmi ~ cdc$exerany)
+```
+
+1. Make a scatterplot of weight versus desired weight. Describe the relationship between these two variables.
+
+```{r}
+plot(cdc$weight, cdc$wtdesire , xlab = 'Weight', ylab = 'Weight Desire')
+```
+
+
+A scatterplot is showing the respondents' Weight against their desire Weight. 
+The relationship between the respondests' actual weight and desire weight is non-linear, it shows a slight increase in the desire weight when the actual weight increases. 
+
+2. Let's consider a new variable: the difference between desired weight (wtdesire) and current weight (weight). Create this new variable by subtracting the two columns in the data frame and assigning them to a new object called wdiff.
+
+```{r}
+wdiff <- cdc$weight - cdc$wtdesire
+head(wdiff)
+wdiff [901]
+```
+
+3. What type of data is wdiff? If an observation wdiff is 0, what does this mean about the person's weight and desired weight. What if wdiff is positive or negative?
+
+```{r}
+class(wdiff)
+```
+If the observation is 0, respondents are in the ideal weight.
+Positive interger: means the number of pounds respondents would have to loss to reach out a desire weight.
+Negative integer: The actual weight is less than the desire weight.Respondents are underweight.
+
+
+4. Describe the distribution of wdiff in terms of its center, shape, and spread, including any plots you use. What does this tell us about how people feel about their current weight?
+
+Over 10000 respondents are not comfortable with their actual weight. 
+
+```{r}
+hist(wdiff)
+```
+5. Using numerical summaries and a side-by-side box plot, determine if men tend to view their weight differently than women.
+
+```{r}
+male_wdiff <- subset(cdc, cdc$gender == 'm')
+summary(male_wdiff$weight)
+dim(male_wdiff)
+```
+```{r}
+fem_wdiff <- subset(cdc, cdc$gender == 'f')
+summary(fem_wdiff$weight)
+dim(fem_wdiff)
+```
+
+```{r}
+boxplot(cdc$weight- cdc$wtdesire ~ cdc$gender, ylab = 'Weight', outline = FALSE , main = " Respondents Weight by Gender")
+```
+
+I used the outline parameter = 'FALSE' to clean up the outliers from the plot and have a better visualization of the final output.
+
+The median weight  by gender shows that men are close to 0, I can make an inference that men tends to keep their desire weight. Women's median are slight far from cero clearly they have a diffence between their current weigth and desire weight being their current weight greater.
+
+6. Now it's time to get creative. Find the mean and standard deviation of weight and determine what proportion of the weights are within one standard deviation of the mean
+
+```{r}
+x <- cdc$weight
+x <- mean(x, na.rm = T)
+x
+```
+```{r}
+y <- cdc$weight
+y <- sd(y, na.rm = T)
+y
+```
+```{r}
+z = subset(cdc, cdc$weight > (x-y) & cdc$weight < (x+y))
+prop_weight = dim(z)/dim(cdc)*100
+prop_weight
+```
+The 70.76 % of respondents proportion of the weights are within the standard distribution of the mean. 
